@@ -61,21 +61,22 @@ const resetStudentsList = (list, page = 1) => {
 		list[i].style.display = '';
 	}
 };
+
 const resetAllStudentsToVisible = () => {
 	let totalStudents = document.getElementsByClassName('student-item');
 	resetStudentsList(totalStudents);
 };
 window.addEventListener('click', (event) => {
-	// console.log(event.target.tagName);
 	if (event.target.tagName === 'A') {
 		console.log(event.target.innerText);
 		let pageNumber = event.target.innerText;
-		// now we know what the value is to pass to the buildStudentList
+
 		let totalStudents = document.getElementsByClassName('student-item');
 		resetAllStudentsToVisible(totalStudents);
 		buildStudentLists(totalStudents, pageNumber);
 	}
 });
+
 /*** 
    Add your global variables that store the DOM elements you will 
    need to reference and/or manipulate. 
