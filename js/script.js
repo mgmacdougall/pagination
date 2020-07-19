@@ -10,7 +10,7 @@ FSJS project 2 - List Filter and Pagination
  */
 let studentsPerPage = [];
 
-const buildStudentLists = (list, page) => {
+const buildStudentLists = (list, page = 1) => {
 	let start = page * 10 - 10;
 	let finish = page * 10;
 	for (let i = 0; i < list.length; i++) {
@@ -20,9 +20,44 @@ const buildStudentLists = (list, page) => {
 	}
 };
 
-document.getElementById('click').addEventListener('click', (e) => {
+const buildButtonStrip = (list) => {
+	// take the total numer of students in the list
+	// assign this to totalButtons =  Number.ceil(list%10) // total # of buttons
+	let totalButtons = Math.ceil(list.length / 10);
+
+	// Get the 'page' class'
+	let pageContainer = document.getElementsByClassName('page')[0];
+	// Create base button strip
+	let buttonContainer = document.createElement('div');
+
+	let buttonListItemContainer = document.createElement('ul');
+	buttonListItemContainer.className = 'pagination';
+
+	// Create the buttons list inner function for now
+	const getli = (buttonNum) => {
+		let li = document.createElement('li');
+		let link = document.createElement('a');
+		link.setAttribute('href', '#');
+		link.textContent = `${buttonNum}`;
+		li.appendChild(link);
+		return li;
+	};
+
+	// Now loop through the totalButtons
+	for (let i = 0; i < totalButtons; i++) {
+		let res = getli(i + 1);
+		buttonListItemContainer.appendChild(res);
+	}
+
+	buttonContainer.appendChild(buttonListItemContainer);
+
+	pageContainer.appendChild(buttonContainer);
+};
+// Sets the list to the first 10 items when page is reloaded
+window.addEventListener('DOMContentLoaded', (event) => {
 	let totalStudents = document.getElementsByClassName('student-item');
-	buildStudentLists(totalStudents, 1);
+	buildStudentLists(totalStudents);
+	buildButtonStrip(totalStudents);
 });
 
 /*** 
