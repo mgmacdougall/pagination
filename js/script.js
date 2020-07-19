@@ -19,14 +19,10 @@ const buildStudentLists = (list, page = 1) => {
 };
 
 const buildButtonStrip = (list) => {
-	// take the total numer of students in the list
-	// assign this to totalButtons =  Number.ceil(list%10) // total # of buttons
-	let totalButtons = Math.ceil(list.length / 10);
+	let totalButtons = Math.ceil(list.length / 10); // total number of buttons
 
-	// Get the 'page' class'
-	let pageContainer = document.getElementsByClassName('page')[0];
-	// Create base button strip
-	let buttonContainer = document.createElement('div');
+	let pageContainer = document.getElementsByClassName('page')[0]; // Get the 'page' class'
+	let buttonContainer = document.createElement('div'); // Create base button strip
 
 	let buttonListItemContainer = document.createElement('ul');
 	buttonListItemContainer.className = 'pagination';
@@ -48,9 +44,9 @@ const buildButtonStrip = (list) => {
 	}
 
 	buttonContainer.appendChild(buttonListItemContainer);
-
 	pageContainer.appendChild(buttonContainer);
 };
+
 // Sets the list to the first 10 items when page is reloaded
 window.addEventListener('DOMContentLoaded', (event) => {
 	let totalStudents = document.getElementsByClassName('student-item');
@@ -58,6 +54,28 @@ window.addEventListener('DOMContentLoaded', (event) => {
 	buildButtonStrip(totalStudents);
 });
 
+const resetStudentsList = (list, page = 1) => {
+	let start = page * 10 - 10;
+	let finish = page * 10;
+	for (let i = 0; i < list.length; i++) {
+		list[i].style.display = '';
+	}
+};
+const resetAllStudentsToVisible = () => {
+	let totalStudents = document.getElementsByClassName('student-item');
+	resetStudentsList(totalStudents);
+};
+window.addEventListener('click', (event) => {
+	// console.log(event.target.tagName);
+	if (event.target.tagName === 'A') {
+		console.log(event.target.innerText);
+		let pageNumber = event.target.innerText;
+		// now we know what the value is to pass to the buildStudentList
+		let totalStudents = document.getElementsByClassName('student-item');
+		resetAllStudentsToVisible(totalStudents);
+		buildStudentLists(totalStudents, 2);
+	}
+});
 /*** 
    Add your global variables that store the DOM elements you will 
    need to reference and/or manipulate. 
