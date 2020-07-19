@@ -73,7 +73,7 @@ window.addEventListener('click', (event) => {
 		// now we know what the value is to pass to the buildStudentList
 		let totalStudents = document.getElementsByClassName('student-item');
 		resetAllStudentsToVisible(totalStudents);
-		buildStudentLists(totalStudents, 2);
+		buildStudentLists(totalStudents, pageNumber);
 	}
 });
 /*** 
