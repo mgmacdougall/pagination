@@ -8,8 +8,6 @@ FSJS project 2 - List Filter and Pagination
 /***
  * Temp Test Code here - when the page loads the 1st 10 students are displayed
  */
-let studentsPerPage = [];
-
 const buildStudentLists = (list, page = 1) => {
 	let start = page * 10 - 10;
 	let finish = page * 10;
