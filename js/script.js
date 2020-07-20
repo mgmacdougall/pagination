@@ -4,10 +4,11 @@ FSJS project 2 - List Filter and Pagination
 ******************************************/
 
 // Study guide for this project - https://drive.google.com/file/d/1OD1diUsTMdpfMDv677TfL1xO2CEkykSz/view?usp=sharing
+// Global Variables:
+let studentWindow = window;
+let totalStudents = document.getElementsByClassName('student-item');
 
-/***
- * Temp Test Code here - when the page loads the 1st 10 students are displayed
- */
+// Builds the student list
 const buildStudentLists = (list, page = 1) => {
 	let start = page * 10 - 10;
 	let finish = page * 10;
@@ -18,6 +19,7 @@ const buildStudentLists = (list, page = 1) => {
 	}
 };
 
+// Builds the button strip
 const buildButtonStrip = (list) => {
 	let totalButtons = Math.ceil(list.length / 10); // total number of buttons
 
@@ -48,31 +50,36 @@ const buildButtonStrip = (list) => {
 };
 
 // Sets the list to the first 10 items when page is reloaded
-window.addEventListener('DOMContentLoaded', (event) => {
-	let totalStudents = document.getElementsByClassName('student-item');
+studentWindow.addEventListener('DOMContentLoaded', () => {
 	buildStudentLists(totalStudents);
 	buildButtonStrip(totalStudents);
+	setActiveClassOnButton();
 });
 
-const resetStudentsList = (list, page = 1) => {
-	let start = page * 10 - 10;
-	let finish = page * 10;
+const resetStudentsList = (list) => {
 	for (let i = 0; i < list.length; i++) {
 		list[i].style.display = '';
 	}
 };
 
-const resetAllStudentsToVisible = () => {
-	let totalStudents = document.getElementsByClassName('student-item');
-	resetStudentsList(totalStudents);
-};
-window.addEventListener('click', (event) => {
-	if (event.target.tagName === 'A') {
-		console.log(event.target.innerText);
-		let pageNumber = event.target.innerText;
+const setActiveClassOnButton = (buttonIndex = 1) => {
+	let pageButtons = document.getElementsByTagName('a');
+	let activeButton = pageButtons[buttonIndex - 1];
 
-		let totalStudents = document.getElementsByClassName('student-item');
-		resetAllStudentsToVisible(totalStudents);
+	for (let i = 0; i < pageButtons.length; i++) {
+		if (i !== buttonIndex - 1) {
+			pageButtons[i].className = '';
+		} else {
+			activeButton.className = 'active';
+		}
+	}
+};
+
+studentWindow.addEventListener('click', (event) => {
+	if (event.target.tagName === 'A') {
+		let pageNumber = event.target.innerText;
+		setActiveClassOnButton(pageNumber);
+		resetStudentsList(totalStudents);
 		buildStudentLists(totalStudents, pageNumber);
 	}
 });
