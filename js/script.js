@@ -8,7 +8,6 @@ Global variables
 ***/
 const studentWindow = window;
 const totalStudents = document.getElementsByClassName('student-item');
-
 const studentHeader = document.querySelector('.page-header');
 
 /***
@@ -147,38 +146,52 @@ studentWindow.addEventListener('DOMContentLoaded', () => {
 	showPage(defaultActiveButtonIndex);
 });
 
-// This code is so that the action of click is only run after the page is completely loaded
-// Build the Close button for the Search message
-
+// Code here is to run after the DOM has completed rendered
 studentWindow.addEventListener('load', (e) => {
+	// Listener for the Button Click on the search
 	let studentSearchButton = document.getElementsByTagName('button')[0];
 
 	studentSearchButton.addEventListener('click', (e) => {
 		e.preventDefault();
 		setStudentsListToInvisible(totalStudents);
 
+		// Removes any pagination bar during the searching
 		let paginationBar = document.getElementsByClassName('pagination')[0];
-		paginationBar.parentNode.remove();
+		if (paginationBar) {
+			paginationBar.parentNode.remove();
+		}
 
+		// Gets the query input field
 		let query = document.getElementsByTagName('input')[0];
 
+		// Search function for the total list of students
 		let filteredStudents = [...totalStudents].filter((student) => {
-			if (student.firstElementChild.querySelector('h3').innerText.includes(query.value)) {
-				return student;
+			if (student) {
+				if (student.firstElementChild.querySelector('h3').innerText.includes(query.value)) {
+					return student;
+				}
 			}
 		});
 
-		// Check for the zero length search result
+		// Check for message container then delete if it exists (occurs when search pressed twice)
+		let messageContainer = document.getElementsByClassName('message')[0];
+		if (messageContainer) {
+			messageContainer.remove();
+		}
+
+		// Check for the zero length search result and print message when nothing there
 		if (filteredStudents.length === 0) {
 			let pageHeader = document.getElementsByClassName('page')[0];
 			let messageContainer = document.createElement('div');
 
 			let messageSpan = document.createElement('span');
+			messageSpan.className = 'message';
 			messageSpan.innerText = `No Results with search '${query.value}'.  Please try another search.`;
 
 			messageContainer.appendChild(messageSpan);
 			pageHeader.appendChild(messageContainer);
 		} else {
+			// else print out the list of students and complete the rendering
 			resetStudentListToVisible(filteredStudents);
 			buildStudentLists(filteredStudents);
 			appendPageLinks(filteredStudents);
