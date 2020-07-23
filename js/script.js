@@ -6,8 +6,29 @@ FSJS project 2 - List Filter and Pagination
 /*** 
 Global variables
 ***/
-let studentWindow = window;
-let totalStudents = document.getElementsByClassName('student-item');
+const studentWindow = window;
+const totalStudents = document.getElementsByClassName('student-item');
+
+const studentHeader = document.querySelector('.page-header');
+
+/***
+ * Builds the search container elements
+ */
+const createSearchContainer = () => {
+	// first create the div container for all the search elements
+	let searchContainer = document.createElement('div');
+	searchContainer.className = 'student-search';
+
+	let searchInput = document.createElement('input');
+	searchInput.setAttribute('placeholder', 'Search for students...');
+
+	let searchButton = document.createElement('button');
+	searchButton.textContent = 'Search';
+
+	searchContainer.appendChild(searchInput);
+	searchContainer.append(searchButton);
+	studentHeader.append(searchContainer);
+};
 
 /***
  * Builds the student list for the page limit passed in
@@ -84,9 +105,19 @@ const resetStudentListToVisible = (list) => {
 };
 
 /***
+ * Sets the display properties for each list item to none
+ */
+const setStudentsListToInvisible = (list) => {
+	for (let i = 0; i < list.length; i++) {
+		list[i].style.display = 'none';
+	}
+};
+
+/***
  * Main show page functionality, that builds the student list
  */
 const showPage = (pageNo) => {
+	createSearchContainer();
 	buildStudentLists(totalStudents);
 	appendPageLinks(totalStudents);
 	setActiveClassOnButton(pageNo);
@@ -114,4 +145,44 @@ studentWindow.addEventListener('click', (event) => {
 studentWindow.addEventListener('DOMContentLoaded', () => {
 	const defaultActiveButtonIndex = 1;
 	showPage(defaultActiveButtonIndex);
+});
+
+// This code is so that the action of click is only run after the page is completely loaded
+// Build the Close button for the Search message
+
+studentWindow.addEventListener('load', (e) => {
+	let studentSearchButton = document.getElementsByTagName('button')[0];
+
+	studentSearchButton.addEventListener('click', (e) => {
+		e.preventDefault();
+		setStudentsListToInvisible(totalStudents);
+
+		let paginationBar = document.getElementsByClassName('pagination')[0];
+		paginationBar.parentNode.remove();
+
+		let query = document.getElementsByTagName('input')[0];
+
+		let filteredStudents = [...totalStudents].filter((student) => {
+			if (student.firstElementChild.querySelector('h3').innerText.includes(query.value)) {
+				return student;
+			}
+		});
+
+		// Check for the zero length search result
+		if (filteredStudents.length === 0) {
+			let pageHeader = document.getElementsByClassName('page')[0];
+			let messageContainer = document.createElement('div');
+
+			let messageSpan = document.createElement('span');
+			messageSpan.innerText = `No Results with search '${query.value}'.  Please try another search.`;
+
+			messageContainer.appendChild(messageSpan);
+			pageHeader.appendChild(messageContainer);
+		} else {
+			resetStudentListToVisible(filteredStudents);
+			buildStudentLists(filteredStudents);
+			appendPageLinks(filteredStudents);
+			setActiveClassOnButton();
+		}
+	});
 });
