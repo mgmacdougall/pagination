@@ -146,41 +146,62 @@ studentWindow.addEventListener('DOMContentLoaded', () => {
 	showPage(defaultActiveButtonIndex);
 });
 
-// Code here is to run after the DOM has completed rendered
+// TODO: Code here is to run after the DOM has completed rendered???
+// Don't think this is correct way to handle, using DOMContentLoaded
+// Wouldn't work b/c getting undefined errors when running the document.getElementBy??
 studentWindow.addEventListener('load', (e) => {
-	// Listener for the Button Click on the search
 	let studentSearchButton = document.getElementsByTagName('button')[0];
+	let query = document.getElementsByTagName('input')[0];
 
 	studentSearchButton.addEventListener('click', (e) => {
 		e.preventDefault();
 		setStudentsListToInvisible(totalStudents);
+		removePagination();
+		let filteredStudents = filterStudentList(query);
+		removeMessageContainer();
+		renderResults(filteredStudents, query);
+	});
 
-		// Removes any pagination bar during the searching
+	const removePagination = () => {
 		let paginationBar = document.getElementsByClassName('pagination')[0];
 		if (paginationBar) {
 			paginationBar.parentNode.remove();
 		}
+	};
 
-		// Gets the query input field
+	const filterStudentList = () => {
 		let query = document.getElementsByTagName('input')[0];
 
 		// Search function for the total list of students
-		let filteredStudents = [...totalStudents].filter((student) => {
+		let filteredList = [...totalStudents].filter((student) => {
 			if (student) {
 				if (student.firstElementChild.querySelector('h3').innerText.includes(query.value)) {
 					return student;
 				}
 			}
 		});
+		return filteredList;
+	};
 
-		// Check for message container then delete if it exists (occurs when search pressed twice)
+	const removeMessageBox = () => {
 		let messageContainer = document.getElementsByClassName('message')[0];
 		if (messageContainer) {
 			messageContainer.remove();
 		}
+	};
 
-		// Check for the zero length search result and print message when nothing there
-		if (filteredStudents.length === 0) {
+	const removeMessageContainer = () => {
+		let messageContainer = document.getElementsByClassName('message')[0];
+
+		if (messageContainer) {
+			messageContainer.remove();
+		}
+	};
+
+	// Render the results of the query input for the student list
+	const renderResults = (list, query) => {
+		if (list.length === 0) {
+			// code here creates the message if list of students is nothing
 			let pageHeader = document.getElementsByClassName('page')[0];
 			let messageContainer = document.createElement('div');
 
@@ -192,10 +213,10 @@ studentWindow.addEventListener('load', (e) => {
 			pageHeader.appendChild(messageContainer);
 		} else {
 			// else print out the list of students and complete the rendering
-			resetStudentListToVisible(filteredStudents);
-			buildStudentLists(filteredStudents);
-			appendPageLinks(filteredStudents);
+			resetStudentListToVisible(list);
+			buildStudentLists(list);
+			appendPageLinks(list);
 			setActiveClassOnButton();
 		}
-	});
+	};
 });
