@@ -10,6 +10,8 @@ const studentWindow = window;
 const totalStudents = document.getElementsByClassName('student-item');
 const studentHeader = document.querySelector('.page-header');
 
+let globalFilter = false; // The global control for the filter
+let globalFilterList = [];
 /***
  * Builds the search container elements
  */
@@ -128,11 +130,70 @@ const showPage = (pageNo) => {
  * Sets the Active on the button based on the button clicked
  */
 studentWindow.addEventListener('click', (event) => {
-	if (event.target.tagName === 'A') {
+	if (event.target.tagName === 'A' && globalFilter === false) {
 		let pageNumber = event.target.innerText;
 		resetStudentListToVisible(totalStudents);
 		buildStudentLists(totalStudents, pageNumber);
 		setActiveClassOnButton(pageNumber);
+	}
+
+	if (event.target.tagName === 'A' && globalFilter === true) {
+		let pageNumber = event.target.innerText;
+		resetStudentListToVisible(globalFilterList);
+		buildStudentLists(globalFilterList, pageNumber);
+		setActiveClassOnButton(pageNumber);
+	}
+
+	if (event.target.tagName === 'BUTTON') {
+		// if true means filter run once && needs reset
+		if (globalFilter === true) {
+			globalFilterList = false;
+			[...totalStudents].forEach((student) => student.classList.remove('filtered'));
+			let errorContainer = document.querySelector('.error_message');
+			if (errorContainer) {
+				errorContainer.remove();
+			}
+		}
+
+		// First thing get the text from the input
+		let searchText = document.querySelector('input').value;
+
+		// get the h3 of all the students in the list
+		let studentNames = document.querySelectorAll('h3');
+
+		for (let i = 0; i < studentNames.length; i++) {
+			if (studentNames[i].innerText.toLowerCase().includes(searchText.toLowerCase())) {
+				studentNames[i].parentNode.parentNode.classList.add('filtered');
+			}
+		}
+
+		// now create the message if no values are found that match
+
+		// set the global filter state to true
+		// hide all the values off the bat
+		setStudentsListToInvisible(totalStudents);
+		globalFilter = true;
+		globalFilterList = document.querySelectorAll('.filtered');
+
+		if (globalFilterList.length === 0) {
+			let docSearchContainer = document.querySelector('.student-list');
+			let mainMessageContainer = document.createElement('div');
+			mainMessageContainer.classList.add('error_message');
+			let messageSpan = document.createElement('span');
+			messageSpan.innerText = `No students found with: ${searchText} `;
+
+			mainMessageContainer.appendChild(messageSpan);
+			docSearchContainer.appendChild(mainMessageContainer);
+		}
+		resetStudentListToVisible(globalFilterList);
+		buildStudentLists(globalFilterList);
+
+		// delete the ul and rebuild
+		document.querySelector('.pagination').remove();
+
+		// buildStudentLists(globalFilterList);
+		appendPageLinks(globalFilterList);
+		setActiveClassOnButton();
 	}
 });
 
@@ -144,79 +205,4 @@ studentWindow.addEventListener('click', (event) => {
 studentWindow.addEventListener('DOMContentLoaded', () => {
 	const defaultActiveButtonIndex = 1;
 	showPage(defaultActiveButtonIndex);
-});
-
-// TODO: Code here is to run after the DOM has completed rendered???
-// Don't think this is correct way to handle, using DOMContentLoaded
-// Wouldn't work b/c getting undefined errors when running the document.getElementBy??
-studentWindow.addEventListener('load', (e) => {
-	let studentSearchButton = document.getElementsByTagName('button')[0];
-	let query = document.getElementsByTagName('input')[0];
-
-	studentSearchButton.addEventListener('click', (e) => {
-		e.preventDefault();
-		setStudentsListToInvisible(totalStudents);
-		removePagination();
-		let filteredStudents = filterStudentList(query);
-		removeMessageContainer();
-		renderResults(filteredStudents, query);
-	});
-
-	const removePagination = () => {
-		let paginationBar = document.getElementsByClassName('pagination')[0];
-		if (paginationBar) {
-			paginationBar.parentNode.remove();
-		}
-	};
-
-	const filterStudentList = () => {
-		let query = document.getElementsByTagName('input')[0];
-
-		// Search function for the total list of students
-		let filteredList = [...totalStudents].filter((student) => {
-			if (student) {
-				if (student.firstElementChild.querySelector('h3').innerText.includes(query.value)) {
-					return student;
-				}
-			}
-		});
-		return filteredList;
-	};
-
-	const removeMessageBox = () => {
-		let messageContainer = document.getElementsByClassName('message')[0];
-		if (messageContainer) {
-			messageContainer.remove();
-		}
-	};
-
-	const removeMessageContainer = () => {
-		let messageContainer = document.getElementsByClassName('message')[0];
-
-		if (messageContainer) {
-			messageContainer.remove();
-		}
-	};
-
-	// Render the results of the query input for the student list
-	const renderResults = (list, query) => {
-		if (list.length === 0) {
-			// code here creates the message if list of students is nothing
-			let pageHeader = document.getElementsByClassName('page')[0];
-			let messageContainer = document.createElement('div');
-
-			let messageSpan = document.createElement('span');
-			messageSpan.className = 'message';
-			messageSpan.innerText = `No Results with search '${query.value}'.  Please try another search.`;
-
-			messageContainer.appendChild(messageSpan);
-			pageHeader.appendChild(messageContainer);
-		} else {
-			// else print out the list of students and complete the rendering
-			resetStudentListToVisible(list);
-			buildStudentLists(list);
-			appendPageLinks(list);
-			setActiveClassOnButton();
-		}
-	};
 });
