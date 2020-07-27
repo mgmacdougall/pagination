@@ -10,8 +10,8 @@ const studentWindow = window;
 const totalStudents = document.getElementsByClassName('student-item');
 const studentHeader = document.querySelector('.page-header');
 
-let globalFilter = false; // The global control for the filter
-let globalFilterList = [];
+let _globalFilter = false; // The global control for the filter
+let _globalFilterList = [];
 /***
  * Builds the search container elements
  */
@@ -115,6 +115,49 @@ const setStudentsListToInvisible = (list) => {
 };
 
 /***
+ * Function to reset the filter results
+ */
+const resetFilterResults = () => {
+	if (_globalFilter === true) {
+		setCurrentFilterState(false);
+		[...totalStudents].forEach((student) => student.classList.remove('filtered'));
+		let errorContainer = document.querySelector('.error_message');
+		if (errorContainer) {
+			errorContainer.remove();
+		}
+	}
+};
+
+/***
+ * Shows error message
+ */
+const showNoValuesFoundMessage = (searchText) => {
+	let docSearchContainer = document.querySelector('.student-list');
+
+	let mainMessageContainer = document.createElement('div');
+	mainMessageContainer.classList.add('error_message');
+
+	let messageSpan = document.createElement('span');
+	messageSpan.innerText = `No students found with: ${searchText} `;
+
+	mainMessageContainer.appendChild(messageSpan);
+	docSearchContainer.appendChild(mainMessageContainer);
+};
+
+/***
+ * Filters the student list based on the text provided
+ */
+const filterStudentList = (searchText) => {
+	let studentNames = document.querySelectorAll('h3');
+
+	for (let i = 0; i < studentNames.length; i++) {
+		if (studentNames[i].innerText.toLowerCase().includes(searchText.toLowerCase())) {
+			studentNames[i].parentNode.parentNode.classList.add('filtered');
+		}
+	}
+};
+
+/***
  * Main show page functionality, that builds the student list
  */
 const showPage = (pageNo) => {
@@ -125,77 +168,63 @@ const showPage = (pageNo) => {
 };
 
 /***
- * Controls the click event on the bubbled up 'a' event
- * Filters and displays the appropriate students
- * Sets the Active on the button based on the button clicked
+ * Controls events for application level functionality
  */
 studentWindow.addEventListener('click', (event) => {
-	if (event.target.tagName === 'A' && globalFilter === false) {
+	if (event.target.tagName === 'A' && _globalFilter === false) {
 		let pageNumber = event.target.innerText;
 		resetStudentListToVisible(totalStudents);
 		buildStudentLists(totalStudents, pageNumber);
 		setActiveClassOnButton(pageNumber);
 	}
 
-	if (event.target.tagName === 'A' && globalFilter === true) {
+	if (event.target.tagName === 'A' && _globalFilter === true) {
 		let pageNumber = event.target.innerText;
-		resetStudentListToVisible(globalFilterList);
-		buildStudentLists(globalFilterList, pageNumber);
+		resetStudentListToVisible(_globalFilterList);
+		buildStudentLists(_globalFilterList, pageNumber);
 		setActiveClassOnButton(pageNumber);
 	}
 
 	if (event.target.tagName === 'BUTTON') {
-		// if true means filter run once && needs reset
-		if (globalFilter === true) {
-			globalFilterList = false;
-			[...totalStudents].forEach((student) => student.classList.remove('filtered'));
-			let errorContainer = document.querySelector('.error_message');
-			if (errorContainer) {
-				errorContainer.remove();
-			}
-		}
+		resetFilterResults(); // will reset the filter results if needed
 
-		// First thing get the text from the input
 		let searchText = document.querySelector('input').value;
+		filterStudentList(searchText);
 
-		// get the h3 of all the students in the list
-		let studentNames = document.querySelectorAll('h3');
-
-		for (let i = 0; i < studentNames.length; i++) {
-			if (studentNames[i].innerText.toLowerCase().includes(searchText.toLowerCase())) {
-				studentNames[i].parentNode.parentNode.classList.add('filtered');
-			}
-		}
-
-		// now create the message if no values are found that match
-
-		// set the global filter state to true
-		// hide all the values off the bat
 		setStudentsListToInvisible(totalStudents);
-		globalFilter = true;
-		globalFilterList = document.querySelectorAll('.filtered');
+		setCurrentFilterState(true);
 
-		if (globalFilterList.length === 0) {
-			let docSearchContainer = document.querySelector('.student-list');
-			let mainMessageContainer = document.createElement('div');
-			mainMessageContainer.classList.add('error_message');
-			let messageSpan = document.createElement('span');
-			messageSpan.innerText = `No students found with: ${searchText} `;
+		_globalFilterList = document.querySelectorAll('.filtered');
 
-			mainMessageContainer.appendChild(messageSpan);
-			docSearchContainer.appendChild(mainMessageContainer);
+		if (_globalFilterList.length === 0) {
+			showNoValuesFoundMessage(searchText);
 		}
-		resetStudentListToVisible(globalFilterList);
-		buildStudentLists(globalFilterList);
+
+		resetStudentListToVisible(_globalFilterList);
+		buildStudentLists(_globalFilterList);
 
 		// delete the ul and rebuild
-		document.querySelector('.pagination').remove();
-
-		// buildStudentLists(globalFilterList);
-		appendPageLinks(globalFilterList);
-		setActiveClassOnButton();
+		buildFilterPaginationBar();
 	}
 });
+
+/***
+ * Helper to set the Global current state of the Filter
+ */
+const setCurrentFilterState = (state) => {
+	if (typeof state === 'boolean') {
+		_globalFilter = state;
+	}
+};
+
+/***
+ * Builds filtered pagination bar
+ */
+const buildFilterPaginationBar = () => {
+	document.querySelector('.pagination').remove();
+	appendPageLinks(_globalFilterList);
+	setActiveClassOnButton();
+};
 
 /**
  * DOM Content Loaded Listener that will create the page, button strip, and buttons
